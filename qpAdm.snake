@@ -1,0 +1,50 @@
+configfile: "config.yaml"
+
+analysis="qpAdm"
+run="run2"
+inputdir="/public/home/jielin/Asian/admixture/run_11.30/" + analysis + "/input/"+run
+outputdir="/public/home/jielin/Asian/admixture/run_11.30/" + analysis +"/output/"+run+"/oneway"
+scriptdir="/public/home/jielin/Asian/admixture/run_11.30/" + analysis +"/script/"+run
+
+
+rule all:
+    input:
+        par=expand("{outputdir}/par.{tar}-{way}",outputdir=outputdir,tar=config["target"],way=config["oneway"]),
+        out=expand("{outputdir}/{tar}-{way}.out",outputdir=outputdir,tar=config["target"],way=config["oneway"]),
+        popleft=expand("{outputdir}/pleft.{tar}-{way}",outputdir=outputdir,tar=config["target"],way=config["oneway"]),
+        popright=expand("{outputdir}/pright.{tar}-{way}",outputdir=outputdir,tar=config["target"],way=config["oneway"]),
+
+
+#run qpAdm
+rule Adm:
+    input:
+        genotypename=expand("{inputdir}/admixture.geno",inputdir=inputdir),
+        snpname=expand("{inputdir}/admixture.snp",inputdir=inputdir),
+        indivname=expand("{inputdir}/admixture.ind",inputdir=inputdir),
+        prightBase=expand("{inputdir}/pright",inputdir=inputdir),
+        pleftBase=expand("{inputdir}/pleft",inputdir=inputdir),
+    output:
+        par=expand("{outputdir}/par.{{target}}-{{oneway}}",outputdir=outputdir),
+        out=expand("{outputdir}/{{target}}-{{oneway}}.out",outputdir=outputdir),
+        popleft=expand("{outputdir}/pleft.{{target}}-{{oneway}}",outputdir=outputdir),
+        popright=expand("{outputdir}/pright.{{target}}-{{oneway}}",outputdir=outputdir),
+    params:
+        path=expand("{outputdir}",outputdir=outputdir),
+        maxrank="7"
+    shell:
+        """
+        if test $(comm -12 <(echo {wildcards.oneway}|tr '^' '\\n'|sort ) <(echo {wildcards.target})|wc -l) -eq 1;then exit 0;fi;
+        echo {wildcards.target} >> {output.popleft};
+        echo {wildcards.oneway}|tr '^' '\\n'  >> {output.popleft}; 
+        #cat {input.prightBase} <(diff <(awk 'NR>1' {output.popleft}) {input.pleftBase}|awk '/^>/{{print $2}}') > {output.popright};
+        cat {input.prightBase} <(diff <(sort {output.popleft}) <(sort {input.pleftBase})|awk '/^>/{{print $2}}') > {output.popright};
+        echo "genotypename: {input.genotypename}" >> {output.par};
+        echo "snpname: {input.snpname}" >> {output.par};
+        echo "indivname: {input.indivname}" >> {output.par};
+        echo "popleft: {output.popleft}" >> {output.par};
+        echo "popright: {output.popright}" >> {output.par};
+        echo "maxrank: {params.maxrank}" >> {output.par};
+        #/usr/local/opt/AdmixTools/bin/qpAdm -p {output.par} > {output.out};
+        qpAdm -p {output.par} > {output.out}
+        """
+
