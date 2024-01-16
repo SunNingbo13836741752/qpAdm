@@ -1,0 +1,12 @@
+#申请计算资源
+salloc -n 32 -N 1 -p normal
+#进入snakemake环境
+source /public/home/jielin/Asian/hap/myenv/bin/activate
+#运算环境+R
+module load mathlib/openblas/0.3.20/gcc-7.3.1 apps/R/4.3.1/R-4.3.1
+
+'''
+需要.ind, .snp, .geno + pleft + pright
+伪单倍型数据只能用 "allsnps= YES","inbreed= NO"
+
+'''
