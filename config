@@ -1,0 +1,9 @@
+#mkcomb.R 生成twoway文件
+'''
+args <- commandArgs(trailingOnly = TRUE)
+O<-c(as.matrix(read.table(paste0(args[1],'pleft'), sep="\t"))[,1])
+PAIRS <- t(combn(O,2))
+write.table(PAIRS,file=paste0(args[1],"2way_list"),quote=F,row.names=F,col.names=F,sep = " ")
+PAIRS <- t(combn(O,3))
+write.table(PAIRS,file=paste0(args[1],"3way_list"),quote=F,row.names=F,col.names=F,sep = " ")
+'''
