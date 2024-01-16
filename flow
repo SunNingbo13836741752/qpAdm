@@ -1,0 +1,15 @@
+# 首先构建target 使用mkcomb.R，需要pleft,mkcomb.R文件
+Rscript /public/home/jielin/Asian/admixture/file/mkcomb.R /public/home/jielin/Asian/admixture/file/\
+
+# 建立snakemake使用的config文件
+cat <(echo "target:") <(awk '{print "  -",$1}' target1 ) <(echo "oneway:") <(awk '{print "  -",$1}' pleft ) <(echo "twoway:") <(awk '{print "  -",$1"^"$2}' 2way_list) > /public/home/jielin/Asian/admixture/file/config.yaml
+
+# 生成job.sh
+for mao in {qpAdm,qpAdm_twoway};do echo "snakemake  -s $mao.snake -j 10 --latency-wait 30 -k --jn {name}.{jobid}.sh" >> job.sh;done
+
+# 进行snakemake自动运行流程 使用job.sh生成的代码进行运行
+snakemake  -s qpAdm.snake -j 10 --latency-wait 30 -k --jn {name}.{jobid}.sh
+snakemake  -s qpAdm_twoway.snake -j 10 --latency-wait 30 -k --jn {name}.{jobid}.sh
+
+# 得出结果
+Rscript results.R /public/home/jielin/Asian/admixture/file/qpAdm/output/run2/twoway/ 2&
