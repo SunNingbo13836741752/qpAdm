@@ -11,5 +11,5 @@ for mao in {qpAdm,qpAdm_twoway};do echo "snakemake  -s $mao.snake -j 10 --latenc
 snakemake  -s qpAdm.snake -j 10 --latency-wait 30 -k --jn {name}.{jobid}.sh
 snakemake  -s qpAdm_twoway.snake -j 10 --latency-wait 30 -k --jn {name}.{jobid}.sh
 
-# 得出结果
+# 得出结果 仅能阅读allsnps= NO 的结果
 Rscript results.R /public/home/jielin/Asian/admixture/file/qpAdm/output/run2/twoway/ 2&
